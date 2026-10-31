@@ -22,7 +22,7 @@
 Clasificación de MRI con Redes Neuronales Convolucionales para tipos de tumores cerebrales  
 }
 
-\author{Jhon Edwuard Zacipa Casas, José Luis Sarta Alvarez  y Marco Julio Gómez Amado }
+\author{Jhon Edward Zacipa Casas, José Luis Sarta Alvarez  y Marco Julio Gómez Amado }
 
 \usepackage{float}
 \begin{document}
@@ -59,8 +59,8 @@ Modelo 2 (ResNet18 - Feature Extraction): utiliza la arquitectura ResNet18~\cite
 Modelo 3 (ResNet18 - Fine-Tuning Parcial): mantiene congeladas las capas de bajo nivel (\texttt{layer1} a \texttt{layer3}) y descongela el bloque superior \texttt{layer4} junto con el clasificador ($8.46$M parámetros), con el fin de adaptar las características de alto nivel a las MRI.
 
 2.3 Estrategia de Entrenamiento y Evaluación.
-Hiperparámetros y Optimizador: Los tres modelos se entrenaron con el optimizador Adam, la función de pérdida de entropía cruzada (Cross-Entropy Loss) y lotes de $32$ imágenes. Los Modelos 1 y 2 usaron una tasa de aprendizaje de $1\times 10^{-3}$ durante $8$ épocas, y el Modelo 3 una de $1\times 10^{-4}$ durante $5$ épocas, para no alterar bruscamente los pesos pre-entrenados.
-Procedimiento de Validación: El conjunto de validación se evaluó en cada época para registrar las curvas de aprendizaje, fijar el número de épocas y seleccionar el mejor modelo; el conjunto de prueba se usó una sola vez al final. Para la reproducibilidad, se fijó la semilla $42$ antes de entrenar cada modelo y se activó el modo determinista de cuDNN.
+Hiperparámetros y Optimizador: Los tres modelos se entrenaron con el optimizador Adam, la función de pérdida de entropía cruzada (Cross-Entropy Loss) y lotes de $32$ imágenes. El Modelo 1 usó una tasa de aprendizaje de $3\times 10^{-4}$ durante $9$ épocas, el Modelo 2 una de $1\times 10^{-3}$ durante $8$ épocas y el Modelo 3 una de $1\times 10^{-4}$ durante $5$ épocas, para no alterar bruscamente los pesos pre-entrenados.
+Procedimiento de Validación: El conjunto de validación se evaluó en cada época para registrar las curvas de aprendizaje, fijar el número de épocas, elegir la tasa de aprendizaje del Modelo 1 (entre $1\times 10^{-3}$ y $3\times 10^{-4}$) y seleccionar el mejor modelo; el conjunto de prueba se usó una sola vez al final. Para la reproducibilidad, se fijó la semilla $42$ antes de entrenar cada modelo y se activó el modo determinista de cuDNN.
 Métricas de Evaluación: Se reportan la exactitud global (Accuracy) y el F1-Score por clase, que equilibra falsos positivos y falsos negativos, ambos relevantes en el diagnóstico clínico.
 Explicabilidad: Se aplicó Grad-CAM sobre el último bloque convolucional (\texttt{layer4}) para visualizar las regiones de la imagen que sustentan cada predicción.
 
@@ -79,16 +79,16 @@ La Tabla I resume el rendimiento cuantitativo global y por clases de los tres en
         \hline
         \textbf{Métrica / Enfoque} & \textbf{Modelo 1: CNN} & \textbf{Modelo 2: Feat. Ext.} & \textbf{Modelo 3: Fine-Tuning} \\ \hline
         Estrategia & Desde cero & Tronco congelado & Bloque \texttt{layer4} \\ \hline
-        Épocas & 8 & 8 & \textbf{5} \\ \hline
-        Exactitud Global & 92.3\% & 90.5\% & \textbf{96.3\%} \\ \hline
-        F1-Score (Glioma) & 0.91 & 0.87 & \textbf{0.95} \\ \hline
-        F1-Score (Healthy) & 0.96 & 0.97 & \textbf{0.99} \\ \hline
-        F1-Score (Meningioma) & 0.83 & 0.82 & \textbf{0.93} \\ \hline
-        F1-Score (Pituitary) & 0.97 & 0.94 & \textbf{0.98} \\ \hline
+        Épocas & 9 & 8 & \textbf{5} \\ \hline
+        Exactitud Global & 95.9\% & 90.5\% & \textbf{96.3\%} \\ \hline
+        F1-Score (Glioma) & 0.94 & 0.87 & \textbf{0.95} \\ \hline
+        F1-Score (Healthy) & 0.98 & 0.97 & \textbf{0.99} \\ \hline
+        F1-Score (Meningioma) & 0.92 & 0.82 & \textbf{0.93} \\ \hline
+        F1-Score (Pituitary) & \textbf{0.99} & 0.94 & 0.98 \\ \hline
     \end{tabular}%
     }
 \end{table}
-Los resultados demuestran que, si bien una arquitectura entrenada desde cero ofrece un desempeño competitivo ($92.3\%$), la extracción pura de características limita el aprendizaje ($90.5\%$). En contraste, el Modelo 3 (Fine-Tuning) maximiza la exactitud global ($96.3\%$) y eleva significativamente el F1-score en clases complejas como el Meningioma ($0.93$)
+Los resultados demuestran que, si bien una arquitectura entrenada desde cero ofrece un desempeño competitivo ($95.9\%$), la extracción pura de características limita el aprendizaje ($90.5\%$). En contraste, el Modelo 3 (Fine-Tuning) maximiza la exactitud global ($96.3\%$) y eleva el F1-score en clases complejas como el Meningioma ($0.93$)
 
 3.2 Curvas de Aprendizaje.
 La Fig.~\ref{fig:curvas} muestra las curvas de aprendizaje del Modelo 3.
@@ -112,7 +112,7 @@ La Fig.~\ref{fig:gradcam} muestra un acierto y un fallo del Modelo 3. En el acie
 \section{Discusión}
 
 4.1 Interpretación y Contextualización de los Hallazgos.
-El Modelo 3 obtuvo el mejor desempeño tanto en validación ($96.8\%$) como en prueba ($96.3\%$), en línea con lo reportado por Swati \textit{et al.}~\cite{swati2019} para el ajuste fino de CNN pre-entrenadas en MRI. El Modelo 2 presenta un sesgo alto: con el tronco congelado, las características aprendidas en imágenes naturales no se adaptan a las MRI, y su exactitud de entrenamiento ($90.0\%$) es similar a la de validación ($89.1\%$). Al descongelar \texttt{layer4}, el Modelo 3 adapta las características de alto nivel conservando las de bajo nivel, mientras que el Modelo 1, entrenado desde cero, resulta competitivo ($92.3\%$) con cuatro veces menos parámetros entrenables que el Modelo 3. En los tres modelos, Meningioma es la clase con menor F1-Score, y el fallo de la Fig.~\ref{fig:gradcam} ilustra su confusión con Glioma. En el Modelo 3, la diferencia entre la exactitud de entrenamiento ($99.5\%$) y la de validación ($96.8\%$) indica un leve sobreajuste: el modelo rinde mejor con los datos con que se entrenó que con datos nuevos.
+El Modelo 3 obtuvo el mejor desempeño tanto en validación ($96.8\%$) como en prueba ($96.3\%$), en línea con lo reportado por Swati \textit{et al.}~\cite{swati2019} para el ajuste fino de CNN pre-entrenadas en MRI. El Modelo 2 presenta un sesgo alto: con el tronco congelado, las características aprendidas en imágenes naturales no se adaptan a las MRI, y su exactitud de entrenamiento ($90.0\%$) es similar a la de validación ($89.1\%$). Al descongelar \texttt{layer4}, el Modelo 3 adapta las características de alto nivel conservando las de bajo nivel, mientras que el Modelo 1, entrenado desde cero, resulta competitivo ($95.9\%$) con cuatro veces menos parámetros entrenables que el Modelo 3. En los tres modelos, Meningioma es la clase con menor F1-Score, y el fallo de la Fig.~\ref{fig:gradcam} ilustra su confusión con Glioma. En el Modelo 3, la diferencia entre la exactitud de entrenamiento ($99.5\%$) y la de validación ($96.8\%$) indica un leve sobreajuste: el modelo rinde mejor con los datos con que se entrenó que con datos nuevos.
 
 Asimismo, el análisis con Grad-CAM evidenció que una confianza alta no garantiza una predicción correcta, pues el modelo puede apoyarse en regiones ajenas al tumor.
 
